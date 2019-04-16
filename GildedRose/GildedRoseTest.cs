@@ -10,13 +10,21 @@ namespace GildedRose
     public class GildedRoseTest
     {
         [Test]
-        public void foo()
+        public void ConjuredItemQuality_DecreasesCorrectly()
         {
-            var items = new List<Item> {new Item {Name = "foo", SellIn = 0, Quality = 0}};
+            var items = new List<Item>
+            {
+                new Item
+                {
+                    Name = "Conjured",
+                    Quality = 42,
+                    SellIn = 30
+                }
+            };
+
             var app = new GildedRose(items);
-
             app.UpdateQuality();
-
+            
             Approvals.Verify(items[0]);
         }
     }

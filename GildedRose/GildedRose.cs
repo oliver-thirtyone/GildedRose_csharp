@@ -4,7 +4,17 @@ namespace GildedRose
 {
     public class GildedRose
     {
+        private const string AGED_BRIE = "Aged Brie";
+        private const string SULFURAS_HAND_OF_RAGNAROS = "Sulfuras, Hand of Ragnaros";
+        private const string BACKSTAGE_PASSES = "Backstage passes to a TAFKAL80ETC concert";
+        private const string CONJURED = "Conjured";
+        private const int MAX_QUALITY = 50;
+        private const int BACKSTAGE_QUALITY_TIER_1 = 11;
+        private const int BACKSTAGE_QUALITY_TIER_2 = 6;
+        private const int MIN_QUALITY = 0;
+        private const int SELL_IN_ZERO = 0;
         IList<Item> Items;
+
         public GildedRose(IList<Item> Items)
         {
             this.Items = Items;
@@ -12,76 +22,91 @@ namespace GildedRose
 
         public void UpdateQuality()
         {
-            for (var i = 0; i < Items.Count; i++)
+            foreach (var item in Items)
             {
-                if (Items[i].Name != "Aged Brie" && Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
+                if (item.Name == SULFURAS_HAND_OF_RAGNAROS)
                 {
-                    if (Items[i].Quality > 0)
-                    {
-                        if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                        {
-                            Items[i].Quality = Items[i].Quality - 1;
-                        }
-                    }
+                    continue;
+                }
+
+                if (CanItemQualityDecrease(item))
+                {
+                    DecreaseQuality(item);
                 }
                 else
                 {
-                    if (Items[i].Quality < 50)
+                    IncreaseQuality(item);
+                }
+
+                DecreaseSellIn(item);
+
+                if (item.SellIn < SELL_IN_ZERO)
+                {
+                    if (item.Name == AGED_BRIE)
                     {
-                        Items[i].Quality = Items[i].Quality + 1;
-
-                        if (Items[i].Name == "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].SellIn < 11)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-
-                            if (Items[i].SellIn < 6)
-                            {
-                                if (Items[i].Quality < 50)
-                                {
-                                    Items[i].Quality = Items[i].Quality + 1;
-                                }
-                            }
-                        }
+                        IncreaseQuality(item);
+                        continue;
                     }
-                }
 
-                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                {
-                    Items[i].SellIn = Items[i].SellIn - 1;
-                }
-
-                if (Items[i].SellIn < 0)
-                {
-                    if (Items[i].Name != "Aged Brie")
+                    if (item.Name == BACKSTAGE_PASSES)
                     {
-                        if (Items[i].Name != "Backstage passes to a TAFKAL80ETC concert")
-                        {
-                            if (Items[i].Quality > 0)
-                            {
-                                if (Items[i].Name != "Sulfuras, Hand of Ragnaros")
-                                {
-                                    Items[i].Quality = Items[i].Quality - 1;
-                                }
-                            }
-                        }
-                        else
-                        {
-                            Items[i].Quality = Items[i].Quality - Items[i].Quality;
-                        }
+                        item.Quality = MIN_QUALITY;
                     }
                     else
                     {
-                        if (Items[i].Quality < 50)
+                        DecreaseQuality(item);
+                    }
+                }
+            }
+        }
+
+        private static bool CanItemQualityDecrease(Item item)
+        {
+            return item.Name != AGED_BRIE
+               && item.Name != BACKSTAGE_PASSES;
+        }
+
+        private static void DecreaseSellIn(Item item)
+        {
+            item.SellIn--;
+        }
+
+        private static void IncreaseQuality(Item item)
+        {
+            if (item.Quality < MAX_QUALITY)
+            {
+                item.Quality = item.Quality + 1;
+
+                if (item.Name == BACKSTAGE_PASSES)
+                {
+                    if (item.SellIn < BACKSTAGE_QUALITY_TIER_1)
+                    {
+                        if (item.Quality < MAX_QUALITY)
                         {
-                            Items[i].Quality = Items[i].Quality + 1;
+                            item.Quality++;
                         }
                     }
+
+                    if (item.SellIn < BACKSTAGE_QUALITY_TIER_2)
+                    {
+                        if (item.Quality < MAX_QUALITY)
+                        {
+                            item.Quality++;
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void DecreaseQuality(Item item)
+        {
+            if (item.Quality > MIN_QUALITY)
+            {
+                item.Quality--;
+
+                if (item.Name == CONJURED)
+                {
+                    item.Quality--;
                 }
             }
         }
