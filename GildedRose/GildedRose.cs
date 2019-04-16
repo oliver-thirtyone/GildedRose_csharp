@@ -29,33 +29,41 @@ namespace GildedRose
                     continue;
                 }
 
-                if (CanItemQualityDecrease(item))
-                {
-                    DecreaseQuality(item);
-                }
-                else
-                {
-                    IncreaseQuality(item);
-                }
+                HandleQualityOfRegularItem(item);
 
                 DecreaseSellIn(item);
 
-                if (item.SellIn < SELL_IN_ZERO)
-                {
-                    if (item.Name == AGED_BRIE)
-                    {
-                        IncreaseQuality(item);
-                        continue;
-                    }
+                HandleQualityOfOverdueItem(item);
+            }
+        }
 
-                    if (item.Name == BACKSTAGE_PASSES)
-                    {
-                        item.Quality = MIN_QUALITY;
-                    }
-                    else
-                    {
-                        DecreaseQuality(item);
-                    }
+        private static void HandleQualityOfRegularItem(Item item)
+        {
+            if (CanItemQualityDecrease(item))
+            {
+                DecreaseQuality(item);
+            }
+            else
+            {
+                IncreaseQuality(item);
+            }
+        }
+
+        private static void HandleQualityOfOverdueItem(Item item)
+        {
+            if (item.SellIn < SELL_IN_ZERO)
+            {
+                if (item.Name == AGED_BRIE)
+                {
+                    IncreaseQuality(item);
+                }
+                else if (item.Name == BACKSTAGE_PASSES)
+                {
+                    item.Quality = MIN_QUALITY;
+                }
+                else
+                {
+                    DecreaseQuality(item);
                 }
             }
         }
@@ -63,7 +71,7 @@ namespace GildedRose
         private static bool CanItemQualityDecrease(Item item)
         {
             return item.Name != AGED_BRIE
-               && item.Name != BACKSTAGE_PASSES;
+                   && item.Name != BACKSTAGE_PASSES;
         }
 
         private static void DecreaseSellIn(Item item)
@@ -73,28 +81,32 @@ namespace GildedRose
 
         private static void IncreaseQuality(Item item)
         {
+            IncreaseQualityIfLowerThanMax(item);
+
+            if (item.Name == BACKSTAGE_PASSES)
+            {
+                HandleBackstagePassesQuality(item);
+            }
+        }
+
+        private static void HandleBackstagePassesQuality(Item item)
+        {
+            if (item.SellIn < BACKSTAGE_QUALITY_TIER_1)
+            {
+                IncreaseQualityIfLowerThanMax(item);
+            }
+
+            if (item.SellIn < BACKSTAGE_QUALITY_TIER_2)
+            {
+                IncreaseQualityIfLowerThanMax(item);
+            }
+        }
+
+        private static void IncreaseQualityIfLowerThanMax(Item item)
+        {
             if (item.Quality < MAX_QUALITY)
             {
-                item.Quality = item.Quality + 1;
-
-                if (item.Name == BACKSTAGE_PASSES)
-                {
-                    if (item.SellIn < BACKSTAGE_QUALITY_TIER_1)
-                    {
-                        if (item.Quality < MAX_QUALITY)
-                        {
-                            item.Quality++;
-                        }
-                    }
-
-                    if (item.SellIn < BACKSTAGE_QUALITY_TIER_2)
-                    {
-                        if (item.Quality < MAX_QUALITY)
-                        {
-                            item.Quality++;
-                        }
-                    }
-                }
+                item.Quality++;
             }
         }
 
