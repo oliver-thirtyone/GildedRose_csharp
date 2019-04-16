@@ -40,22 +40,25 @@ namespace GildedRose
 
                 DecreaseSellIn(item);
 
-                if (item.SellIn < SELL_IN_ZERO)
-                {
-                    if (item.Name == AGED_BRIE)
-                    {
-                        IncreaseQuality(item);
-                        continue;
-                    }
+                HandleOverdueItem(item);
+            }
+        }
 
-                    if (item.Name == BACKSTAGE_PASSES)
-                    {
+        private static void HandleOverdueItem(Item item)
+        {
+            if (item.SellIn < SELL_IN_ZERO)
+            {
+                switch (item.Name)
+                {
+                    case AGED_BRIE:
+                        IncreaseQuality(item);
+                        break;
+                    case BACKSTAGE_PASSES:
                         item.Quality = MIN_QUALITY;
-                    }
-                    else
-                    {
+                        break;
+                    default:
                         DecreaseQuality(item);
-                    }
+                        break;
                 }
             }
         }
@@ -63,7 +66,7 @@ namespace GildedRose
         private static bool CanItemQualityDecrease(Item item)
         {
             return item.Name != AGED_BRIE
-               && item.Name != BACKSTAGE_PASSES;
+                   && item.Name != BACKSTAGE_PASSES;
         }
 
         private static void DecreaseSellIn(Item item)
